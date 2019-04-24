@@ -9,6 +9,7 @@ use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Mockery;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class EekhoornApiTest extends TestCase
@@ -55,20 +56,58 @@ class EekhoornApiTest extends TestCase
     }
 
     /** @test */
+    public function testItBuildsARequestObject()
+    {
+        $this->httpClient->shouldReceive('sendRequest')->andReturnUsing(function (RequestInterface $request) {
+            $this->assertEquals('POST', $request->getMethod());
+            $this->assertEquals([
+                'Host'       => [
+                    'api.foobar.com',
+                ],
+                'some'       => [
+                    'header',
+                ],
+                'some-other' => [
+                    'header',
+                ],
+            ], $request->getHeaders());
+            $this->assertEquals('{"foo":"body","bar":"body"}', (string)$request->getBody());
+            $this->assertEquals('https://api.foobar.com/foo-bar', (string)$request->getUri());
+
+            return Mockery::mock(ResponseInterface::class, [
+                'getStatusCode' => 200,
+            ]);
+        });
+
+        $this->sdk->doRequest(
+            '/foo-bar',
+            'post',
+            [
+                'foo' => 'body',
+                'bar' => 'body',
+            ],
+            [
+                'some'       => 'header',
+                'some-other' => 'header',
+            ]
+        );
+    }
+
+    /** @test */
     public function testItThrowsARequestExceptionIfTheStatusCodeIsHigherThan300()
     {
         $httpClient = Mockery::mock(HttpClient::class, [
             'sendRequest' => Mockery::mock(ResponseInterface::class, [
-                'getStatusCode' => 401,
-                'getReasonPhrase' => 'Authorization required'
-            ])
+                'getStatusCode'   => 401,
+                'getReasonPhrase' => 'Authorization required',
+            ]),
         ]);
         $this->sdk->setHttpClient($httpClient);
 
         $this->expectException(RequestException::class);
         $this->expectExceptionMessage('Authorization required');
         $this->expectExceptionCode(401);
-        $this->sdk->doRequest('/bla', 'post');
+        $this->sdk->doRequest('/foo-bar', 'post');
     }
 
     /** @test */
@@ -76,11 +115,11 @@ class EekhoornApiTest extends TestCase
     {
         $httpClient = Mockery::mock(HttpClient::class, [
             'sendRequest' => Mockery::mock(ResponseInterface::class, [
-                'getStatusCode' => 200
-            ])
+                'getStatusCode' => 200,
+            ]),
         ]);
         $this->sdk->setHttpClient($httpClient);
-        $response = $this->sdk->doRequest('/bla', 'get');
+        $response = $this->sdk->doRequest('/foo-bar', 'get');
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 }
