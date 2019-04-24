@@ -5,6 +5,7 @@ namespace Eekhoorn\PhpSdk\Contracts;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
 
 interface EekhoornApiInterface
 {
@@ -29,6 +30,17 @@ interface EekhoornApiInterface
      * @return HttpClient
      */
     public function getHttpClient(): HttpClient;
+
+    /**
+     * @param CacheInterface $cache
+     * @return $this
+     */
+    public function setCache(CacheInterface $cache): self;
+
+    /**
+     * @return CacheInterface
+     */
+    public function getCache(): CacheInterface;
 
     /**
      * @param string $uri

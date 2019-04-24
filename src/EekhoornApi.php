@@ -11,6 +11,8 @@ use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Simple\FilesystemCache;
 
 class EekhoornApi implements EekhoornApiInterface
 {
@@ -20,17 +22,24 @@ class EekhoornApi implements EekhoornApiInterface
     /** @var HttpClient */
     protected $httpClient;
 
+    /** @var CacheInterface */
+    protected $cache;
+
     /**
-     * @param string          $apiUrl
-     * @param HttpClient|null $httpClient
+     * @param string              $apiUrl
+     * @param HttpClient|null     $httpClient
+     * @param CacheInterface|null $cache
      */
     public function __construct(
         string $apiUrl,
-        HttpClient $httpClient = null
+        HttpClient $httpClient = null,
+        CacheInterface $cache = null
     ) {
         if ($httpClient === null) {
             $httpClient = HttpClientDiscovery::find();
         }
+
+        $this->setCache($cache ?: new FilesystemCache('de-eekhoorn-sdk'));
 
         $this
             ->setApiUrl($apiUrl)
@@ -73,6 +82,25 @@ class EekhoornApi implements EekhoornApiInterface
     public function getHttpClient(): HttpClient
     {
         return $this->httpClient;
+    }
+
+    /**
+     * @param CacheInterface $cache
+     * @return $this
+     */
+    public function setCache(CacheInterface $cache): EekhoornApiInterface
+    {
+        $this->cache = $cache;
+
+        return $this;
+    }
+
+    /**
+     * @return CacheInterface
+     */
+    public function getCache(): CacheInterface
+    {
+        return $this->cache;
     }
 
     /**

@@ -11,21 +11,26 @@ use Mockery;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
 
 class EekhoornApiTest extends TestCase
 {
-    /** @var HttpClient|Mockery\MockInterface */
+    /** @var HttpClient */
     private $httpClient;
 
     /** @var EekhoornApi */
     private $sdk;
+
+    /** @var CacheInterface */
+    private $cache;
 
     public function setUp(): void
     {
         parent::setUp();
 
         $this->httpClient = Mockery::mock(HttpClient::class);
-        $this->sdk = new EekhoornApi('https://api.foobar.com', $this->httpClient);
+        $this->cache = Mockery::mock(CacheInterface::class);
+        $this->sdk = new EekhoornApi('https://api.foobar.com', $this->httpClient, $this->cache);
     }
 
     /** @test */
@@ -39,7 +44,7 @@ class EekhoornApiTest extends TestCase
     {
         $httpClient = Mockery::mock(HttpClient::class);
         $this->sdk->setHttpClient($httpClient);
-        $this->assertEquals($httpClient, $this->sdk->getHttpClient());
+        $this->assertSame($httpClient, $this->sdk->getHttpClient());
     }
 
     /** @test */
@@ -53,6 +58,20 @@ class EekhoornApiTest extends TestCase
     {
         $this->sdk->setApiUrl('http://api.foo.bar');
         $this->assertEquals('http://api.foo.bar', $this->sdk->getApiUrl());
+    }
+
+    /** @test */
+    public function testItSetsTheCacheSystemThroughTheConstructor()
+    {
+        $this->assertEquals($this->cache, $this->sdk->getCache());
+    }
+
+    /** @test */
+    public function testItSetsTheCacheSystemThroughTheSetter()
+    {
+        $cache = Mockery::mock(CacheInterface::class);
+        $this->sdk->setCache($cache);
+        $this->assertSame($cache, $this->sdk->getCache());
     }
 
     /** @test */
