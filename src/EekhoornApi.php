@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Eekhoorn\PhpSdk;
 
+use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use GuzzleHttp\Psr7\Request;
 use Http\Client\HttpClient;
@@ -11,7 +12,7 @@ use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class EekhoornApi
+class EekhoornApi implements EekhoornApiInterface
 {
     /** @var string */
     protected $apiUrl;
@@ -40,7 +41,7 @@ class EekhoornApi
      * @param string $apiUrl
      * @return $this
      */
-    public function setApiUrl(string $apiUrl): self
+    public function setApiUrl(string $apiUrl): EekhoornApiInterface
     {
         $this->apiUrl = $apiUrl;
 
@@ -59,7 +60,7 @@ class EekhoornApi
      * @param HttpClient $httpClient
      * @return $this
      */
-    public function setHttpClient(HttpClient $httpClient): self
+    public function setHttpClient(HttpClient $httpClient): EekhoornApiInterface
     {
         $this->httpClient = $httpClient;
 
