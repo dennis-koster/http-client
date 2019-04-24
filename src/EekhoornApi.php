@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Request;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class EekhoornApi
 {
@@ -78,11 +79,11 @@ class EekhoornApi
      * @param string $method
      * @param array  $body
      * @param array  $headers
-     * @return mixed
+     * @return ResponseInterface
      * @throws \Http\Client\Exception
      * @throws RequestException
      */
-    public function doRequest($uri, $method = 'get', array $body = [], array $headers = [])
+    public function doRequest($uri, $method = 'get', array $body = [], array $headers = []): ResponseInterface
     {
         if (strpos($uri, $this->apiUrl) !== 0) {
             $uri = $this->apiUrl . $uri;
@@ -105,7 +106,7 @@ class EekhoornApi
      * @param array        $headers
      * @return RequestInterface
      */
-    private function buildRequest($uri, $method = 'GET', $body = '', array $headers = [])
+    private function buildRequest($uri, $method = 'GET', $body = '', array $headers = []): RequestInterface
     {
         if (is_array($body)) {
             $body = json_encode($body);
