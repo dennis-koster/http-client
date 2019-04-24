@@ -28,7 +28,7 @@ class EekhoornApi
         HttpClient $httpClient = null
     ) {
         if ($httpClient === null) {
-            HttpClientDiscovery::find();
+            $httpClient = HttpClientDiscovery::find();
         }
 
         $this
