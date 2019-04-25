@@ -6,7 +6,9 @@ namespace Eekhoorn\PhpSdk;
 
 use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
+use function GuzzleHttp\Psr7\parse_response;
 use GuzzleHttp\Psr7\Request;
+use function GuzzleHttp\Psr7\str;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
@@ -108,18 +110,36 @@ class EekhoornApi implements EekhoornApiInterface
      * @param string $method
      * @param array  $body
      * @param array  $headers
+     * @param int    $ttl
      * @return ResponseInterface
-     * @throws \Http\Client\Exception
      * @throws RequestException
+     * @throws \Http\Client\Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function doRequest($uri, $method = 'get', array $body = [], array $headers = []): ResponseInterface
-    {
+    public function doRequest(
+        $uri,
+        $method = 'get',
+        array $body = [],
+        array $headers = [],
+        $ttl = self::TTL_10MIN
+    ): ResponseInterface {
         if (strpos($uri, $this->apiUrl) !== 0) {
             $uri = $this->apiUrl . $uri;
         }
 
+        // Attempt to fetch a response from cache
+        $cacheKey = sha1(join($headers) . $uri);
+        if (($response = $this->cache->get($cacheKey)) && strtolower($method) === 'get') {
+            return parse_response($response);
+        }
+
         $request = $this->buildRequest($uri, $method, $body, $headers);
         $response = $this->httpClient->sendRequest($request);
+
+        // Store the response in cache
+        if (strtolower($method) === 'get') {
+            $this->cache->set($cacheKey, str($response), $ttl);
+        }
 
         if ($response->getStatusCode() >= 300) {
             throw new RequestException($request, $response);

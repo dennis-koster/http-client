@@ -4,6 +4,7 @@
   "type": "library",
   "require": {
     "php": ">=7.2",
+    "ext-json": "*",
     "php-http/httplug": "^2.0",
     "php-http/discovery": "^1.6",
     "guzzlehttp/psr7": "^1.5",

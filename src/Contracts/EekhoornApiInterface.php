@@ -9,6 +9,8 @@ use Psr\SimpleCache\CacheInterface;
 
 interface EekhoornApiInterface
 {
+    public const TTL_10MIN = 600;
+
     /**
      * @param string $apiUrl
      * @return $this
