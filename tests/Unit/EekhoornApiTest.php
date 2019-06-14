@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Eekhoorn\PhpSdk\Tests;
+namespace Eekhoorn\PhpSdk\Tests\Unit;
 
 use Eekhoorn\PhpSdk\EekhoornApi;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
@@ -29,7 +29,10 @@ class EekhoornApiTest extends TestCase
         parent::setUp();
 
         $this->httpClient = Mockery::mock(HttpClient::class);
-        $this->cache = Mockery::mock(CacheInterface::class);
+        $this->cache = Mockery::mock(CacheInterface::class, [
+            'get' => null,
+            'set' => true,
+        ]);
         $this->sdk = new EekhoornApi('https://api.foobar.com', $this->httpClient, $this->cache);
     }
 
@@ -134,7 +137,11 @@ class EekhoornApiTest extends TestCase
     {
         $httpClient = Mockery::mock(HttpClient::class, [
             'sendRequest' => Mockery::mock(ResponseInterface::class, [
-                'getStatusCode' => 200,
+                'getStatusCode'      => 200,
+                'getProtocolVersion' => '1.0',
+                'getReasonPhrase'    => '',
+                'getHeaders'         => [],
+                'getBody'            => '',
             ]),
         ]);
         $this->sdk->setHttpClient($httpClient);
