@@ -2,8 +2,8 @@
 
 namespace Eekhoorn\PhpSdk;
 
-use Eekhoorn\PhpSdk\DataObjects\Vacancy;
 use Jenssegers\Model\Model;
+use Tightenco\Collect\Support\Collection;
 
 class JsonApiParser
 {
@@ -22,7 +22,7 @@ class JsonApiParser
 
     /**
      * @param string $jsonApiData
-     * @return Model[]|Model
+     * @return Collection|Model[]|Model
      */
     public function parse(string $jsonApiData)
     {
@@ -35,35 +35,43 @@ class JsonApiParser
         $data = $decoded['data'];
 
         if ( ! $this->isCollection($data)) {
-            return $this->parseSingle($data);
+            return $this->parseSingleItem($data);
         }
 
-        return $this->parseCollection($data);
+        return $this->parseItemCollection($data);
     }
 
-    public function parseCollection(array $dataSets)
+    /**
+     * Builds a collection of models from data sets
+     *
+     * @param array $dataSets
+     * @return Collection
+     */
+    public function parseItemCollection(array $dataSets)
     {
         $modelClass = null;
-        $collection = [];
+        $collection = new Collection();
 
         foreach ($dataSets as $dataSet) {
             if ($modelClass === null) {
-                $modelClass = $this->determineModel($dataSet['type']);
+                $modelClass = $this->determineModelClass($dataSet['type']);
             }
 
-            $collection[] = $this->parseSingle($dataSet);
+            $collection->push($this->parseSingleItem($dataSet));
         }
 
         return $collection;
     }
 
     /**
+     * Builds a single model from given data set
+     *
      * @param array $data
      * @return Model
      */
-    public function parseSingle(array $data)
+    public function parseSingleItem(array $data)
     {
-        $modelClass = $this->determineModel($data['type']);
+        $modelClass = $this->determineModelClass($data['type']);
 
         /** @var Model $model */
         $model = new $modelClass();
@@ -81,7 +89,7 @@ class JsonApiParser
      * @param string $resourceType
      * @return string
      */
-    protected function determineModel(string $resourceType): string
+    protected function determineModelClass(string $resourceType): string
     {
         if (!array_key_exists($resourceType, $this->typeMapping)) {
             throw new \RuntimeException('Could not determine model for given type "' . $resourceType . '".');
@@ -107,5 +115,4 @@ class JsonApiParser
 
         return true;
     }
-
 }

@@ -2,11 +2,24 @@
 
 namespace Eekhoorn\PhpSdk\Contracts;
 
+use Eekhoorn\PhpSdk\JsonApiParser;
 use Psr\Http\Message\StreamInterface;
+use Tightenco\Collect\Support\Collection;
 
 interface EekhoornApiInterface extends JsonApiSdkInterface
 {
     public const PATH_VACANCIES = '/vacancies';
+
+    /**
+     * @param JsonApiParser $parser
+     * @return self
+     */
+    public function setParser(JsonApiParser $parser): self;
+
+    /**
+     * @return JsonApiParser|null
+     */
+    public function getParser(): ?JsonApiParser;
 
     /**
      * @param int   $page
@@ -14,7 +27,7 @@ interface EekhoornApiInterface extends JsonApiSdkInterface
      * @param array $filters
      * @param array $includes
      * @param int   $ttl
-     * @return StreamInterface
+     * @return Collection
      */
     public function getVacancies(
         int $page = 1,
@@ -22,5 +35,5 @@ interface EekhoornApiInterface extends JsonApiSdkInterface
         array $filters = [],
         array $includes = [],
         $ttl = self::TTL_10MIN
-    ): StreamInterface;
+    ): Collection;
 }

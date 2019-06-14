@@ -6,6 +6,7 @@ namespace Eekhoorn\PhpSdk\Tests\Unit;
 
 use Eekhoorn\PhpSdk\EekhoornApi;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
+use Eekhoorn\PhpSdk\JsonApiParser;
 use Http\Client\HttpClient;
 use Mockery;
 use PHPUnit\Framework\TestCase;
@@ -24,26 +25,30 @@ class EekhoornApiTest extends TestCase
     /** @var CacheInterface */
     private $cache;
 
+    /** @var JsonApiParser|Mockery\MockInterface */
+    private $parser;
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->httpClient = Mockery::mock(HttpClient::class);
+        $this->parser = Mockery::mock(JsonApiParser::class);
         $this->cache = Mockery::mock(CacheInterface::class, [
             'get' => null,
             'set' => true,
         ]);
-        $this->sdk = new EekhoornApi('https://api.foobar.com', $this->httpClient, $this->cache);
+        $this->sdk = new EekhoornApi('https://api.foobar.com', $this->httpClient, $this->cache, $this->parser);
     }
 
     /** @test */
-    public function testItSetsAnHttpClientThroughTheConstructor()
+    public function it_sets_an_http_client_through_the_constructor()
     {
-        $this->assertEquals($this->httpClient, $this->sdk->getHttpClient());
+        $this->assertSame($this->httpClient, $this->sdk->getHttpClient());
     }
 
     /** @test */
-    public function testItSetsAnHttpClientThroughTheSetter()
+    public function it_sets_an_http_client_through_the_setter()
     {
         $httpClient = Mockery::mock(HttpClient::class);
         $this->sdk->setHttpClient($httpClient);
@@ -51,34 +56,52 @@ class EekhoornApiTest extends TestCase
     }
 
     /** @test */
-    public function testItSetsAnApiUrlThroughTheConstructor()
+    public function it_sets_an_api_url_through_the_constructor()
     {
-        $this->assertEquals('https://api.foobar.com', $this->sdk->getApiUrl());
+        $this->assertSame('https://api.foobar.com', $this->sdk->getApiUrl());
     }
 
     /** @test */
-    public function testItSetsAnApiUrlThroughTheSetter()
+    public function it_sets_an_api_url_through_the_setter()
     {
         $this->sdk->setApiUrl('http://api.foo.bar');
         $this->assertEquals('http://api.foo.bar', $this->sdk->getApiUrl());
     }
 
     /** @test */
-    public function testItSetsTheCacheSystemThroughTheConstructor()
+    public function it_sets_the_cache_system_through_the_constructor()
     {
-        $this->assertEquals($this->cache, $this->sdk->getCache());
+        $this->assertSame($this->cache, $this->sdk->getCache());
     }
 
     /** @test */
-    public function testItSetsTheCacheSystemThroughTheSetter()
+    public function it_sets_the_cache_system_through_the_setter()
     {
         $cache = Mockery::mock(CacheInterface::class);
         $this->sdk->setCache($cache);
         $this->assertSame($cache, $this->sdk->getCache());
     }
 
+    /**
+     * @test
+     */
+    public function it_sets_the_parser_through_the_constructor()
+    {
+        $this->assertSame($this->parser, $this->sdk->getParser());
+    }
+
+    /**
+     * @test
+     */
+    public function it_sets_the_parser_through_the_setter()
+    {
+        $parser = Mockery::mock(JsonApiParser::class);
+        $this->sdk->setParser($parser);
+        $this->assertSame($parser, $this->sdk->getParser());
+    }
+
     /** @test */
-    public function testItBuildsARequestObject()
+    public function it_builds_a_request_object()
     {
         $this->httpClient->shouldReceive('sendRequest')->andReturnUsing(function (RequestInterface $request) {
             $this->assertEquals('POST', $request->getMethod());
@@ -116,7 +139,7 @@ class EekhoornApiTest extends TestCase
     }
 
     /** @test */
-    public function testItThrowsARequestExceptionIfTheStatusCodeIsHigherThan300()
+    public function it_throws_a_request_exception_if_the_status_code_is_higher_than_300()
     {
         $httpClient = Mockery::mock(HttpClient::class, [
             'sendRequest' => Mockery::mock(ResponseInterface::class, [
@@ -133,7 +156,7 @@ class EekhoornApiTest extends TestCase
     }
 
     /** @test */
-    public function testItReturnsAResponse()
+    public function it_returns_a_response()
     {
         $httpClient = Mockery::mock(HttpClient::class, [
             'sendRequest' => Mockery::mock(ResponseInterface::class, [

@@ -11,7 +11,6 @@ use Eekhoorn\PhpSdk\JsonApiParser;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Swis\Http\Fixture\Client;
-use Swis\Http\Fixture\MockNotFoundException;
 use Swis\Http\Fixture\ResponseBuilder;
 
 class EekhoornApiTest extends TestCase
@@ -22,6 +21,9 @@ class EekhoornApiTest extends TestCase
     /** @var EekhoornApiInterface */
     private $sdk;
 
+    /** @var JsonApiParser */
+    private $parser;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -29,25 +31,28 @@ class EekhoornApiTest extends TestCase
         $stubsPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'stubs';
         $responseBuilder = new ResponseBuilder($stubsPath);
         $this->client = new Client($responseBuilder);
-        $this->sdk = new EekhoornApi('http://localhost', $this->client);
+        $this->parser = new JsonApiParser([
+            'vacancies' => Vacancy::class
+        ]);
+        $this->sdk = new EekhoornApi('http://localhost', $this->client, null, $this->parser);
     }
 
     /** @test */
-    public function testItFetchesVacancies()
+    public function it_fetches_vacancies()
     {
-        $response = $this->sdk->getVacancies(
-            1,
-            100,
-            ['title' => 'henk'],
-            ['department'],
-            0
-        );
-        $body = $response->getContents();
+        $vacancies = $this->sdk->getVacancies();
+        $this->assertCount(2, $vacancies);
+        /** @var Vacancy $firstVacancy */
+        $firstVacancy = $vacancies->get(0);
+        $this->assertEquals('vacancy-id-1', $firstVacancy->id);
+        $this->assertEquals('Vacancy title 1', $firstVacancy->title);
+        $this->assertEquals('Lorem ipsum dolor', $firstVacancy->description);
 
-        $parser = new JsonApiParser([
-            'vacancies' => Vacancy::class
-        ]);
-        var_dump($parser->parse($body));
+        /** @var Vacancy $secondVacancy */
+        $secondVacancy = $vacancies->get(1);
+        $this->assertEquals('vacancy-id-2', $secondVacancy->id);
+        $this->assertEquals('Vacancy title 2', $secondVacancy->title);
+        $this->assertEquals('Lorem ipsum dolor', $secondVacancy->description);
     }
 
 

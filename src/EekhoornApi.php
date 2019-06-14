@@ -14,30 +14,35 @@ use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\FilesystemCache;
+use Tightenco\Collect\Support\Collection;
 
 class EekhoornApi implements EekhoornApiInterface
 {
     /** @var string */
     protected $apiUrl;
 
-    /** @var HttpClient */
+    /** @var HttpClient|null */
     protected $httpClient;
 
-    /** @var CacheInterface */
+    /** @var CacheInterface|null */
     protected $cache;
+
+    /** @var JsonApiParser|null */
+    protected $parser;
 
     /**
      * @param string              $apiUrl
      * @param HttpClient|null     $httpClient
      * @param CacheInterface|null $cache
+     * @param JsonApiParser       $parser
      */
     public function __construct(
         string $apiUrl,
         HttpClient $httpClient = null,
-        CacheInterface $cache = null
+        CacheInterface $cache = null,
+        JsonApiParser $parser = null
     ) {
         if ($httpClient === null) {
             $httpClient = HttpClientDiscovery::find();
@@ -46,6 +51,7 @@ class EekhoornApi implements EekhoornApiInterface
         $this->setCache($cache ?: new FilesystemCache('de-eekhoorn-sdk'));
 
         $this
+            ->setParser($parser)
             ->setApiUrl($apiUrl)
             ->setHttpClient($httpClient);
     }
@@ -86,6 +92,25 @@ class EekhoornApi implements EekhoornApiInterface
     public function getHttpClient(): HttpClient
     {
         return $this->httpClient;
+    }
+
+    /**
+     * @param JsonApiParser $parser
+     * @return EekhoornApi
+     */
+    public function setParser(?JsonApiParser $parser): EekhoornApiInterface
+    {
+        $this->parser = $parser;
+
+        return $this;
+    }
+
+    /**
+     * @return JsonApiParser|null
+     */
+    public function getParser(): ?JsonApiParser
+    {
+        return $this->parser;
     }
 
     /**
@@ -156,7 +181,7 @@ class EekhoornApi implements EekhoornApiInterface
      * @param array $filters
      * @param array $includes
      * @param int   $ttl
-     * @return StreamInterface
+     * @return Collection
      * @throws RequestException
      * @throws \Http\Client\Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -167,12 +192,15 @@ class EekhoornApi implements EekhoornApiInterface
         array $filters = [],
         array $includes = [],
         $ttl = self::TTL_10MIN
-    ): StreamInterface {
+    ): Collection {
         $body = $this->buildGetBody($page, $pageSize, $filters, $includes);
 
         $response = $this->doRequest(self::PATH_VACANCIES, self::METHOD_GET, $body, [], $ttl);
 
-        return $response->getBody();
+        $body = $response->getBody();
+        $content = $body->getContents();
+
+        return $this->parser->parse($content);
     }
 
     /**
