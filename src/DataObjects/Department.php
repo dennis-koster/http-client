@@ -2,7 +2,10 @@
 
 namespace Eekhoorn\PhpSdk\DataObjects;
 
-class Department extends AbstractDataObject
+class Department extends AbstractResource
 {
-
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 }

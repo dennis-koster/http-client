@@ -5,29 +5,14 @@ declare(strict_types=1);
 namespace Eekhoorn\PhpSdk;
 
 use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
-use Eekhoorn\PhpSdk\Contracts\JsonApiSdkInterface;
+use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
+use Eekhoorn\PhpSdk\DataObjects\Vacancy;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
-use function GuzzleHttp\Psr7\parse_response;
-use GuzzleHttp\Psr7\Request;
-use function GuzzleHttp\Psr7\str;
 use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Cache\Simple\FilesystemCache;
-use Tightenco\Collect\Support\Collection;
 
-class EekhoornApi implements EekhoornApiInterface
+class EekhoornApi extends JsonApiSdk implements EekhoornApiInterface
 {
-    /** @var string */
-    protected $apiUrl;
-
-    /** @var HttpClient|null */
-    protected $httpClient;
-
-    /** @var CacheInterface|null */
-    protected $cache;
 
     /** @var JsonApiParser|null */
     protected $parser;
@@ -44,54 +29,9 @@ class EekhoornApi implements EekhoornApiInterface
         CacheInterface $cache = null,
         JsonApiParser $parser = null
     ) {
-        if ($httpClient === null) {
-            $httpClient = HttpClientDiscovery::find();
-        }
+        parent::__construct($apiUrl, $httpClient, $cache);
 
-        $this->setCache($cache ?: new FilesystemCache('de-eekhoorn-sdk'));
-
-        $this
-            ->setParser($parser)
-            ->setApiUrl($apiUrl)
-            ->setHttpClient($httpClient);
-    }
-
-    /**
-     * @param string $apiUrl
-     * @return $this
-     */
-    public function setApiUrl(string $apiUrl): JsonApiSdkInterface
-    {
-        $this->apiUrl = $apiUrl;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiUrl(): string
-    {
-        return $this->apiUrl;
-    }
-
-    /**
-     * @param HttpClient $httpClient
-     * @return $this
-     */
-    public function setHttpClient(HttpClient $httpClient): JsonApiSdkInterface
-    {
-        $this->httpClient = $httpClient;
-
-        return $this;
-    }
-
-    /**
-     * @return HttpClient
-     */
-    public function getHttpClient(): HttpClient
-    {
-        return $this->httpClient;
+        $this->setParser($parser);
     }
 
     /**
@@ -114,74 +54,12 @@ class EekhoornApi implements EekhoornApiInterface
     }
 
     /**
-     * @param CacheInterface $cache
-     * @return $this
-     */
-    public function setCache(CacheInterface $cache): JsonApiSdkInterface
-    {
-        $this->cache = $cache;
-
-        return $this;
-    }
-
-    /**
-     * @return CacheInterface
-     */
-    public function getCache(): CacheInterface
-    {
-        return $this->cache;
-    }
-
-    /**
-     * @param string $uri
-     * @param string $method
-     * @param array  $body
-     * @param array  $headers
-     * @param int    $ttl
-     * @return ResponseInterface
-     * @throws RequestException
-     * @throws \Http\Client\Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    public function doRequest(
-        $uri,
-        $method = self::METHOD_GET,
-        array $body = [],
-        array $headers = [],
-        $ttl = self::TTL_10MIN
-    ): ResponseInterface {
-        if (strpos($uri, $this->apiUrl) !== 0) {
-            $uri = $this->apiUrl . $uri;
-        }
-
-        // Attempt to fetch a response from cache
-        $cacheKey = sha1(http_build_query($headers) . $uri);
-        if (($response = $this->cache->get($cacheKey)) && strtolower($method) === 'get' && $ttl !== 0) {
-            return parse_response($response);
-        }
-
-        $request  = $this->buildRequest($uri, $method, $body, $headers);
-        $response = $this->httpClient->sendRequest($request);
-
-        if ($response->getStatusCode() >= 300) {
-            throw new RequestException($request, $response);
-        }
-
-        // Store the response in cache
-        if (strtolower($method) === 'get' && $ttl !== 0) {
-            $this->cache->set($cacheKey, str($response), $ttl);
-        }
-
-        return $response;
-    }
-
-    /**
      * @param int   $page
      * @param int   $pageSize
      * @param array $filters
      * @param array $includes
      * @param int   $ttl
-     * @return Collection
+     * @return ResourceCollection
      * @throws RequestException
      * @throws \Http\Client\Exception
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -192,67 +70,36 @@ class EekhoornApi implements EekhoornApiInterface
         array $filters = [],
         array $includes = [],
         $ttl = self::TTL_10MIN
-    ): Collection {
-        $body = $this->buildGetBody($page, $pageSize, $filters, $includes);
+    ): ResourceCollection {
+        $parameters = $this->buildGetParameters($page, $pageSize, $filters, $includes);
 
-        $response = $this->doRequest(self::PATH_VACANCIES, self::METHOD_GET, $body, [], $ttl);
-
-        $body = $response->getBody();
-        $content = $body->getContents();
+        $response = $this->doRequest(self::PATH_VACANCIES, self::METHOD_GET, $parameters, [], $ttl);
+        $body     = $response->getBody();
+        $content  = $body->getContents();
 
         return $this->parser->parse($content);
     }
 
     /**
-     * @param int   $page
-     * @param int   $pageSize
-     * @param array $filters
-     * @param array $includes
-     * @return array
+     * @param string $id
+     * @param array  $includes
+     * @param int    $ttl
+     * @return Vacancy
+     * @throws RequestException
+     * @throws \Http\Client\Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    protected function buildGetBody(
-        int $page = 1,
-        int $pageSize = 100,
-        array $filters = [],
-        array $includes = []
-    ): array {
-        $body = [
-            'page' => [
-                'number' => $page,
-                'size'   => $pageSize,
-            ],
-        ];
-        if ( ! empty($filters)) {
-            $body['filter'] = $filters;
-        }
-
-        if ( ! empty($includes)) {
-            $body['includes'] = $includes;
-        }
-
-        return $body;
-    }
-
-    /**
-     * @param              $uri
-     * @param string       $method
-     * @param array        $body
-     * @param array        $headers
-     * @return RequestInterface
-     */
-    private function buildRequest($uri, $method = self::METHOD_GET, array $body = [], array $headers = []): RequestInterface
+    public function getVacancy(string $id, array $includes = [], $ttl = self::TTL_10MIN): Vacancy
     {
-        if ($method === self::METHOD_GET && ! empty($body)) {
-            $uri  .= "?" . http_build_query($body);
-            $body = '';
-        }
+        $response = $this->doRequest(
+            self::PATH_VACANCIES . '/' . $id,
+            self::METHOD_GET,
+            ['includes' => $includes]
+        );
 
-        if (is_array($body)) {
-            $body = json_encode($body);
-        }
+        $body     = $response->getBody();
+        $content  = $body->getContents();
 
-        $request = new Request($method, $uri, $headers, $body);
-
-        return $request;
+        return $this->parser->parse($content);
     }
 }

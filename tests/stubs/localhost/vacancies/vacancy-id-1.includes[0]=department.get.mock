@@ -1,0 +1,46 @@
+{
+  "data": {
+    "type": "vacancies",
+    "id": "vacancy-id-1",
+    "attributes": {
+      "title": "Vacancy title 1",
+      "description": "Lorem ipsum dolor"
+    },
+    "relationships": {
+      "department": {
+        "data": {
+          "type": "departments",
+          "id": "department-id-1"
+        },
+        "links": {
+          "related": "http://localhost/departments/department-id-1"
+        }
+      },
+      "location": {
+        "data": {
+          "type": "locations",
+          "id": "location-id-1"
+        },
+        "links": {
+          "related": "http://localhost/locations/location-id-1"
+        }
+      }
+    },
+    "links": {
+      "self": "http://localhost/vacancies/vacancy-id-1"
+    }
+  },
+  "included": [
+    {
+      "type": "departments",
+      "id": "department-id-1",
+      "attributes": {
+        "name": "Delivery",
+        "description": "Ship and deliver furniture"
+      },
+      "links": {
+        "self": "http://localhost/departments/department-id-1"
+      }
+    }
+  ]
+}

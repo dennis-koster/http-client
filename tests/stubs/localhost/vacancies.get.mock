@@ -44,5 +44,10 @@
         "self": "http://localhost/vacancies/vacancy-id-2"
       }
     }
-  ]
+  ],
+  "links": {
+    "self": "http://localhost/vacancies",
+    "next": "http://localhost/vacancies?page[number]=2",
+    "last": "http://localhost/vacancies?page[number]=10"
+  }
 }

@@ -2,8 +2,9 @@
 
 namespace Eekhoorn\PhpSdk\Contracts;
 
+use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
+use Eekhoorn\PhpSdk\DataObjects\Vacancy;
 use Eekhoorn\PhpSdk\JsonApiParser;
-use Psr\Http\Message\StreamInterface;
 use Tightenco\Collect\Support\Collection;
 
 interface EekhoornApiInterface extends JsonApiSdkInterface
@@ -27,7 +28,7 @@ interface EekhoornApiInterface extends JsonApiSdkInterface
      * @param array $filters
      * @param array $includes
      * @param int   $ttl
-     * @return Collection
+     * @return ResourceCollection|Vacancy[]
      */
     public function getVacancies(
         int $page = 1,
@@ -35,5 +36,13 @@ interface EekhoornApiInterface extends JsonApiSdkInterface
         array $filters = [],
         array $includes = [],
         $ttl = self::TTL_10MIN
-    ): Collection;
+    ): ResourceCollection;
+
+    /**
+     * @param string $id
+     * @param array  $includes
+     * @param int    $ttl
+     * @return Vacancy
+     */
+    public function getVacancy(string $id, array $includes = [], $ttl = self::TTL_10MIN): Vacancy;
 }
