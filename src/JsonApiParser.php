@@ -161,7 +161,9 @@ class JsonApiParser
                 continue;
             }
 
-            $relation->associate($includedResource);
+            $relatedResource = $this->parseSingleItem($includedResource);
+
+            $relation->associate($relatedResource);
         }
 
         return $relation;

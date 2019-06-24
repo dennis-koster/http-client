@@ -6,13 +6,14 @@ namespace Eekhoorn\PhpSdk\Tests\Integration;
 
 use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
 use Eekhoorn\PhpSdk\DataObjects\Department;
+use Eekhoorn\PhpSdk\DataObjects\Location;
+use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
 use Eekhoorn\PhpSdk\DataObjects\Vacancy;
 use Eekhoorn\PhpSdk\EekhoornApi;
 use Eekhoorn\PhpSdk\JsonApiParser;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Swis\Http\Fixture\Client;
-use Swis\Http\Fixture\MockNotFoundException;
 use Swis\Http\Fixture\ResponseBuilder;
 
 class EekhoornApiTest extends TestCase
@@ -36,6 +37,7 @@ class EekhoornApiTest extends TestCase
         $this->parser    = new JsonApiParser([
             'vacancies'   => Vacancy::class,
             'departments' => Department::class,
+            'locations'   => Location::class,
         ]);
         $this->sdk       = new EekhoornApi('http://localhost', $this->client, null, $this->parser);
     }
@@ -79,13 +81,25 @@ class EekhoornApiTest extends TestCase
      */
     public function it_sets_includes_department_and_locations_on_vacancy()
     {
-        try {
-            $vacancy = $this->sdk->getVacancy('vacancy-id-1', ['department'], 0);
-        } catch (MockNotFoundException $exception) {
-            dump($exception->getPossiblePaths());
-        }
+        $vacancy = $this->sdk->getVacancy('vacancy-id-1', ['department', 'locations'], 0);
 
-        dump($vacancy);
+        $this->assertInstanceOf(Department::class, $vacancy->department);
+        $this->assertEquals('department-id-1', $vacancy->department->id);
+        $this->assertEquals('departments', $vacancy->department->type);
+        $this->assertEquals('Delivery', $vacancy->department->name);
+        $this->assertEquals('Ship and deliver furniture', $vacancy->department->description);
+
+        $this->assertInstanceOf(ResourceCollection::class, $vacancy->locations);
+
+        $this->assertInstanceOf(Location::class, $vacancy->locations->get(0));
+        $this->assertEquals('location-id-1', $vacancy->locations->get(0)->id);
+        $this->assertEquals('locations', $vacancy->locations->get(0)->type);
+        $this->assertEquals('Bloemendaal', $vacancy->locations->get(0)->name);
+
+        $this->assertInstanceOf(Location::class, $vacancy->locations->get(1));
+        $this->assertEquals('location-id-2', $vacancy->locations->get(1)->id);
+        $this->assertEquals('locations', $vacancy->locations->get(1)->type);
+        $this->assertEquals('Hoorn', $vacancy->locations->get(1)->name);
     }
 
 

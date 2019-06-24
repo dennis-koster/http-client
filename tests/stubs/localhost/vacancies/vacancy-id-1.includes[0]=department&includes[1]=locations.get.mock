@@ -44,6 +44,26 @@
       "links": {
         "self": "http://localhost/departments/department-id-1"
       }
+    },
+    {
+      "type": "locations",
+      "id": "location-id-1",
+      "attributes": {
+        "name": "Bloemendaal"
+      },
+      "links": {
+        "self": "http://localhost/locations/location-id-1"
+      }
+    },
+    {
+      "type": "locations",
+      "id": "location-id-2",
+      "attributes": {
+        "name": "Hoorn"
+      },
+      "links": {
+        "self": "http://localhost/locations/location-id-2"
+      }
     }
   ]
 }

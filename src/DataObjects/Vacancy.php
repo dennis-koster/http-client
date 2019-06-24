@@ -6,15 +6,16 @@ use Eekhoorn\PhpSdk\DataObjects\Relations\HasMany;
 use Eekhoorn\PhpSdk\DataObjects\Relations\HasOne;
 
 /**
- * @property string          $title
- * @property string          $description
- * @property null|Department $department
+ * @property string                             $title
+ * @property string                             $description
+ * @property null|Department                    $department
+ * @property null|ResourceCollection|Location[] $locations
  */
 class Vacancy extends AbstractResource
 {
     protected $fillable = [
         'title',
-        'description'
+        'description',
     ];
 
     public function department(): HasOne

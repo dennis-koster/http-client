@@ -3,6 +3,7 @@
 namespace Eekhoorn\PhpSdk\DataObjects\Relations;
 
 use Eekhoorn\PhpSdk\Contracts\ResourceInterface;
+use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
 
 class HasMany
 {
@@ -12,14 +13,14 @@ class HasMany
     protected $resourceType;
 
     /**
-     * @var ResourceInterface[]|null
+     * @var ResourceCollection|null
      */
     protected $resources;
 
     /**
      * @var string[]
      */
-    protected $ids;
+    protected $ids = [];
 
     /**
      * @param string $resourceType
@@ -47,14 +48,23 @@ class HasMany
         return $this;
     }
 
+    public function getIds(): array
+    {
+        return $this->ids;
+    }
+
     /**
      * @param array|ResourceInterface $resource
      * @return self
      */
     public function associate($resource): self
     {
+        if ($this->resources === null) {
+            $this->resources = new ResourceCollection();
+        }
+
         if ($resource instanceof ResourceInterface) {
-            $this->resources[] = $resource;
+            $this->resources->push($resource);
             $this->addId($resource->getId());
 
             return $this;
@@ -70,9 +80,9 @@ class HasMany
     }
 
     /**
-     * @return ResourceInterface[]|null
+     * @return ResourceCollection|null
      */
-    public function get(): ?array
+    public function get(): ?ResourceCollection
     {
         return $this->resources;
     }

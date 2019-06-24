@@ -15,7 +15,7 @@ use Jenssegers\Model\Model;
 abstract class AbstractResource extends Model implements ResourceInterface
 {
     /**
-     * @var array
+     * @var array|HasOne[]|HasMany[]
      */
     protected $relationships = [];
 
@@ -47,9 +47,9 @@ abstract class AbstractResource extends Model implements ResourceInterface
      */
     protected function hasOne($resourceClass, $relationName = null): HasOne
     {
-        $relationName = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
-        $relation = new HasOne($resourceClass);
-        $this->relationships[$relationName] = $relation;
+        $relationName                         = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
+        $relation                             = new HasOne($resourceClass);
+        $this->relationships[ $relationName ] = $relation;
 
         return $relation;
     }
@@ -61,10 +61,19 @@ abstract class AbstractResource extends Model implements ResourceInterface
      */
     protected function hasMany($resourceClass, $relationName = null): HasMany
     {
-        $relationName = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
-        $relation = new HasMany($resourceClass);
-        $this->relationships[$relationName] = $relation;
+        $relationName                         = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
+        $relation                             = new HasMany($resourceClass);
+        $this->relationships[ $relationName ] = $relation;
 
         return $relation;
+    }
+
+    public function __get($key)
+    {
+        if (array_key_exists($key, $this->relationships)) {
+            return $this->relationships[ $key ]->get();
+        }
+
+        return parent::__get($key);
     }
 }
