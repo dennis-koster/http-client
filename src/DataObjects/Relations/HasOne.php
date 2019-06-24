@@ -14,7 +14,7 @@ class HasOne
     /**
      * @var ResourceInterface|null
      */
-    protected $included ;
+    protected $resource ;
 
     /**
      * @var string
@@ -48,7 +48,7 @@ class HasOne
     {
         $this->setId($resource->getId());
 
-        $this->included = $resource;
+        $this->resource = $resource;
 
         return $this;
     }
@@ -58,6 +58,6 @@ class HasOne
      */
     public function get(): ?ResourceInterface
     {
-        return $this->included;
+        return $this->resource;
     }
 }

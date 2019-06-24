@@ -2,6 +2,7 @@
 
 namespace Eekhoorn\PhpSdk\DataObjects;
 
+use Eekhoorn\PhpSdk\DataObjects\Relations\HasMany;
 use Eekhoorn\PhpSdk\DataObjects\Relations\HasOne;
 
 /**
@@ -21,9 +22,9 @@ class Vacancy extends AbstractResource
         return $this->hasOne(Department::class);
     }
 
-    public function location(): HasOne
+    public function locations(): HasMany
     {
-        return $this->hasOne(Location::class);
+        return $this->hasMany(Location::class);
     }
 
 }

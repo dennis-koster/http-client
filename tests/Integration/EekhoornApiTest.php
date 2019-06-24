@@ -43,9 +43,7 @@ class EekhoornApiTest extends TestCase
     /** @test */
     public function it_fetches_vacancies()
     {
-        $vacancies = $this->sdk->getVacancies();
-
-        dump($vacancies->getLinks());
+        $vacancies = $this->sdk->getVacancies(1, 100, [], [], 0);
 
         $this->assertCount(2, $vacancies);
         /** @var Vacancy $firstVacancy */
@@ -68,7 +66,7 @@ class EekhoornApiTest extends TestCase
      */
     public function it_fetches_a_vacancy()
     {
-        $vacancy = $this->sdk->getVacancy('vacancy-id-1');
+        $vacancy = $this->sdk->getVacancy('vacancy-id-1', [], 0);
 
         $this->assertEquals('vacancy-id-1', $vacancy->id);
         $this->assertEquals('Vacancy title 1', $vacancy->title);
@@ -79,14 +77,13 @@ class EekhoornApiTest extends TestCase
     /**
      * @test
      */
-    public function it_sets_includes_department_on_vacancy()
+    public function it_sets_includes_department_and_locations_on_vacancy()
     {
         try {
-            $vacancy = $this->sdk->getVacancy('vacancy-id-1', ['department']);
+            $vacancy = $this->sdk->getVacancy('vacancy-id-1', ['department'], 0);
         } catch (MockNotFoundException $exception) {
             dump($exception->getPossiblePaths());
         }
-
 
         dump($vacancy);
     }

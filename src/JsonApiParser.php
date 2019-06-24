@@ -4,9 +4,10 @@ namespace Eekhoorn\PhpSdk;
 
 use Eekhoorn\PhpSdk\Contracts\ResourceInterface;
 use Eekhoorn\PhpSdk\DataObjects\AbstractResource;
+use Eekhoorn\PhpSdk\DataObjects\Relations\HasMany;
+use Eekhoorn\PhpSdk\DataObjects\Relations\HasOne;
 use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
 use Illuminate\Support\Str;
-use Psr\Http\Message\ResponseInterface;
 
 class JsonApiParser
 {
@@ -63,7 +64,7 @@ class JsonApiParser
                 $modelClass = $this->determineModelClass($dataSet['type']);
             }
 
-            $collection->push($this->parseSingleItem($dataSet));
+            $collection->push($this->parseSingleItem($dataSet, $included));
         }
 
         $collection
@@ -112,24 +113,71 @@ class JsonApiParser
                 continue;
             }
 
-            $resource->$relationName()->setId($relationIdentifiers['id']);
+            /** @var HasOne|HasMany $relation */
+            $relation = $resource->$relationName();
 
-            if ( ! empty($included)) {
-                foreach ($included as $include) {
+            if ($relation instanceof HasMany) {
+                $relationIdentifiers = ! $this->isCollection($relationIdentifiers)
+                    ? [$relationIdentifiers]
+                    : $relationIdentifiers;
 
-                    if (    $include['type'] === $relationIdentifiers['type']
-                        &&  $include['id'] === $relationIdentifiers['id']
-                    ) {
-                        $relatedResource = $this->parseSingleItem($include);
-                        $resource->$relationName()->associate($relatedResource);
-                    }
-
-                    continue 2;
-                }
+                $this->setPluralRelation($relation, $relationIdentifiers, $included);
+                continue;
             }
+
+            $this->setSingularRelation($relation, $relationIdentifiers, $included);
         }
 
         return $resource;
+    }
+
+    protected function setSingularRelation(HasOne $relation, array $data, array $included = []): HasOne
+    {
+        $relation->setId($data['id']);
+
+        if (empty($included)) {
+            return $relation;
+        }
+
+        $includedResource = $this->findIncludedResource($data['type'], $data['id'], $included);
+
+        if ($includedResource === null) {
+            return $relation;
+        }
+
+        $relatedResource = $this->parseSingleItem($includedResource);
+        $relation->associate($relatedResource);
+
+        return $relation;
+    }
+
+    protected function setPluralRelation(HasMany $relation, array $dataSets, array $included = []): HasMany
+    {
+        foreach ($dataSets as $data) {
+            $includedResource = $this->findIncludedResource($data['type'], $data['id'], $included);
+
+            if ($includedResource === null) {
+                $relation->addId($data['id']);
+                continue;
+            }
+
+            $relation->associate($includedResource);
+        }
+
+        return $relation;
+    }
+
+    protected function findIncludedResource(string $resourceType, string $resourceId, array $included = []): ?array
+    {
+        foreach ($included as $include) {
+            if (    $include['type'] === $resourceType
+                &&  $include['id'] === $resourceId
+            ) {
+                return $include;
+            }
+        }
+
+        return null;
     }
 
     /**

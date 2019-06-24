@@ -3,6 +3,7 @@
 namespace Eekhoorn\PhpSdk\DataObjects;
 
 use Eekhoorn\PhpSdk\Contracts\ResourceInterface;
+use Eekhoorn\PhpSdk\DataObjects\Relations\HasMany;
 use Eekhoorn\PhpSdk\DataObjects\Relations\HasOne;
 use Illuminate\Support\Str;
 use Jenssegers\Model\Model;
@@ -48,6 +49,20 @@ abstract class AbstractResource extends Model implements ResourceInterface
     {
         $relationName = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
         $relation = new HasOne($resourceClass);
+        $this->relationships[$relationName] = $relation;
+
+        return $relation;
+    }
+
+    /**
+     * @param string $resourceClass
+     * @param string $relationName
+     * @return HasMany
+     */
+    protected function hasMany($resourceClass, $relationName = null): HasMany
+    {
+        $relationName = $relationName ?: Str::snake(debug_backtrace()[1]['function']);
+        $relation = new HasMany($resourceClass);
         $this->relationships[$relationName] = $relation;
 
         return $relation;

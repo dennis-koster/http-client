@@ -16,14 +16,17 @@
           "related": "http://localhost/departments/department-id-1"
         }
       },
-      "location": {
-        "data": {
-          "type": "locations",
-          "id": "location-id-1"
-        },
-        "links": {
-          "related": "http://localhost/locations/location-id-1"
-        }
+      "locations": {
+        "data": [
+          {
+            "type": "locations",
+            "id": "location-id-1"
+          },
+          {
+            "type": "locations",
+            "id": "location-id-2"
+          }
+        ]
       }
     },
     "links": {

@@ -94,7 +94,9 @@ class EekhoornApi extends JsonApiSdk implements EekhoornApiInterface
         $response = $this->doRequest(
             self::PATH_VACANCIES . '/' . $id,
             self::METHOD_GET,
-            ['includes' => $includes]
+            ['includes' => $includes],
+            [],
+            $ttl
         );
 
         $body     = $response->getBody();
