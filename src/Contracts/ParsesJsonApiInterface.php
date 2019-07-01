@@ -2,16 +2,15 @@
 
 namespace Eekhoorn\PhpSdk\Contracts;
 
-use Eekhoorn\PhpSdk\EekhoornApi;
 use Eekhoorn\PhpSdk\JsonApiParser;
 
 interface ParsesJsonApiInterface
 {
     /**
      * @param JsonApiParser $parser
-     * @return EekhoornApi
+     * @return ParsesJsonApiInterface
      */
-    public function setParser(?JsonApiParser $parser): EekhoornApiInterface;
+    public function setParser(?JsonApiParser $parser): ParsesJsonApiInterface;
 
     /**
      * @return JsonApiParser|null

@@ -2,6 +2,7 @@
 
 namespace Eekhoorn\PhpSdk\Contracts;
 
+use Eekhoorn\PhpSdkInterface\Enums\HttpMethodsEnum;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
@@ -9,11 +10,6 @@ use Psr\SimpleCache\CacheInterface;
 
 interface JsonApiSdkInterface
 {
-    public const TTL_10MIN = 600;
-
-    public const METHOD_GET = 'GET';
-    public const METHOD_POST = 'POST';
-
     /**
      * @param string $apiUrl
      * @return $this
@@ -56,6 +52,6 @@ interface JsonApiSdkInterface
      * @throws \Http\Client\Exception
      * @throws RequestException
      */
-    public function doRequest($uri, $method = 'get', array $body = [], array $headers = []): ResponseInterface;
+    public function doRequest($uri, $method = HttpMethodsEnum::GET, array $body = [], array $headers = []): ResponseInterface;
 
 }

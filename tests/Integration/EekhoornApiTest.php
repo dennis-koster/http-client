@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Eekhoorn\PhpSdk\Tests\Integration;
 
-use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
-use Eekhoorn\PhpSdk\DataObjects\Department;
-use Eekhoorn\PhpSdk\DataObjects\Location;
-use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
-use Eekhoorn\PhpSdk\DataObjects\Vacancy;
+use Eekhoorn\PhpSdk\Contracts\ApiInterface;
+use Eekhoorn\PhpSdkInterface\DataObjects\Department;
+use Eekhoorn\PhpSdkInterface\DataObjects\Location;
+use Eekhoorn\PhpSdkInterface\DataObjects\ResourceCollection;
+use Eekhoorn\PhpSdkInterface\DataObjects\Vacancy;
 use Eekhoorn\PhpSdk\EekhoornApi;
 use Eekhoorn\PhpSdk\JsonApiParser;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +21,7 @@ class EekhoornApiTest extends TestCase
     /** @var ClientInterface */
     private $client;
 
-    /** @var EekhoornApiInterface */
+    /** @var ApiInterface */
     private $sdk;
 
     /** @var JsonApiParser */

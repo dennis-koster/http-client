@@ -2,11 +2,11 @@
 
 namespace Eekhoorn\PhpSdk;
 
-use Eekhoorn\PhpSdk\Contracts\ResourceInterface;
-use Eekhoorn\PhpSdk\DataObjects\AbstractResource;
-use Eekhoorn\PhpSdk\DataObjects\Relations\HasMany;
-use Eekhoorn\PhpSdk\DataObjects\Relations\HasOne;
-use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
+use Eekhoorn\PhpSdkInterface\Contracts\ResourceInterface;
+use Eekhoorn\PhpSdkInterface\DataObjects\AbstractResource;
+use Eekhoorn\PhpSdkInterface\DataObjects\Relations\HasMany;
+use Eekhoorn\PhpSdkInterface\DataObjects\Relations\HasOne;
+use Eekhoorn\PhpSdkInterface\DataObjects\ResourceCollection;
 use Illuminate\Support\Str;
 
 class JsonApiParser

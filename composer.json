@@ -12,7 +12,8 @@
     "symfony/cache": "^4.2",
     "jenssegers/model": "^1.2",
     "symfony/var-dumper": "^4.3",
-    "illuminate/support": "^5.8"
+    "illuminate/support": "^5.8",
+    "de-eekhoorn/de-eekhoorn-php-sdk-interface": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.1",
@@ -32,9 +33,13 @@
   "config": {
     "preferred-install": "dist"
   },
+  "repositories": [
+    { "type": "vcs", "url": "git@gitlab.pxlwidgets.com:clients/basiclabel/de-eekhoorn/de-eekhoorn-php-sdk-interface.git" }
+  ],
   "suggest": {
     "php-http/guzzle5-adapter": "Install this package if Guzzle 5 is available in the application.",
     "php-http/guzzle6-adapter": "Install this package if Guzzle 6 is available in the application.",
     "php-http/curl-client": "Install this package if Guzzle is not available in the application, but curl is."
-  }
+  },
+  "minimum-stability": "stable"
 }

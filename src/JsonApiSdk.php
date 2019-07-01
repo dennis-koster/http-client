@@ -3,6 +3,8 @@
 namespace Eekhoorn\PhpSdk;
 
 use Eekhoorn\PhpSdk\Contracts\JsonApiSdkInterface;
+use Eekhoorn\PhpSdkInterface\Enums\CacheDurationsEnum;
+use Eekhoorn\PhpSdkInterface\Enums\HttpMethodsEnum;
 use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use function GuzzleHttp\Psr7\parse_response;
 use GuzzleHttp\Psr7\Request;
@@ -116,10 +118,10 @@ class JsonApiSdk implements JsonApiSdkInterface
      */
     public function doRequest(
         $uri,
-        $method = self::METHOD_GET,
+        $method = HttpMethodsEnum::GET,
         array $body = [],
         array $headers = [],
-        $ttl = self::TTL_10MIN
+        $ttl = CacheDurationsEnum::DURATION_10_MIN
     ): ResponseInterface {
         if (strpos($uri, $this->apiUrl) !== 0) {
             $uri = $this->apiUrl . $uri;
@@ -183,9 +185,9 @@ class JsonApiSdk implements JsonApiSdkInterface
      * @param array        $headers
      * @return RequestInterface
      */
-    protected function buildRequest($uri, $method = self::METHOD_GET, array $body = [], array $headers = []): RequestInterface
+    protected function buildRequest($uri, $method = HttpMethodsEnum::GET, array $body = [], array $headers = []): RequestInterface
     {
-        if ($method === self::METHOD_GET && ! empty($body)) {
+        if ($method === HttpMethodsEnum::GET && ! empty($body)) {
             $uri  .= "?" . http_build_query($body);
             $body = '';
         }
