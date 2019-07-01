@@ -4,23 +4,10 @@ namespace Eekhoorn\PhpSdk\Contracts;
 
 use Eekhoorn\PhpSdk\DataObjects\ResourceCollection;
 use Eekhoorn\PhpSdk\DataObjects\Vacancy;
-use Eekhoorn\PhpSdk\JsonApiParser;
-use Tightenco\Collect\Support\Collection;
 
-interface EekhoornApiInterface extends JsonApiSdkInterface
+interface EekhoornApiInterface extends JsonApiSdkInterface, ParsesJsonApiInterface
 {
     public const PATH_VACANCIES = '/vacancies';
-
-    /**
-     * @param JsonApiParser $parser
-     * @return self
-     */
-    public function setParser(JsonApiParser $parser): self;
-
-    /**
-     * @return JsonApiParser|null
-     */
-    public function getParser(): ?JsonApiParser;
 
     /**
      * @param int   $page
