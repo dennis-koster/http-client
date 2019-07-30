@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Eekhoorn\PhpSdk\Tests\Integration;
 
-use Eekhoorn\PhpSdk\Contracts\ApiInterface;
+use Eekhoorn\PhpSdk\Contracts\EekhoornApiInterface;
 use Eekhoorn\PhpSdkInterface\DataObjects\Department;
 use Eekhoorn\PhpSdkInterface\DataObjects\Location;
 use Eekhoorn\PhpSdkInterface\DataObjects\ResourceCollection;
@@ -21,7 +21,7 @@ class EekhoornApiTest extends TestCase
     /** @var ClientInterface */
     private $client;
 
-    /** @var ApiInterface */
+    /** @var EekhoornApiInterface */
     private $sdk;
 
     /** @var JsonApiParser */

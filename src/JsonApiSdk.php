@@ -189,7 +189,7 @@ class JsonApiSdk implements JsonApiSdkInterface
     {
         if ($method === HttpMethodsEnum::GET && ! empty($body)) {
             $uri  .= "?" . http_build_query($body);
-            $body = '';
+            $body = null;
         }
 
         if (is_array($body)) {

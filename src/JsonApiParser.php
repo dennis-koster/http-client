@@ -31,7 +31,7 @@ class JsonApiParser
     public function parse(string $jsonApiData)
     {
         $decoded = json_decode($jsonApiData, true);
-        if ( ! array_key_exists('data', $decoded)) {
+        if ( ! is_array($decoded) || ! array_key_exists('data', $decoded)) {
             throw new \RuntimeException('Could not parse given json data');
         }
 
@@ -60,10 +60,6 @@ class JsonApiParser
         $collection = new ResourceCollection();
 
         foreach ($dataSets as $dataSet) {
-            if ($modelClass === null) {
-                $modelClass = $this->determineModelClass($dataSet['type']);
-            }
-
             $collection->push($this->parseSingleItem($dataSet, $included));
         }
 
@@ -172,8 +168,8 @@ class JsonApiParser
     protected function findIncludedResource(string $resourceType, string $resourceId, array $included = []): ?array
     {
         foreach ($included as $include) {
-            if (    $include['type'] === $resourceType
-                &&  $include['id'] === $resourceId
+            if ($include['type'] === $resourceType
+                && $include['id'] === $resourceId
             ) {
                 return $include;
             }
