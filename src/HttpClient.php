@@ -1,27 +1,27 @@
 <?php
 
-namespace Eekhoorn\PhpSdk;
+namespace DennisKoster\HttpClient;
 
-use Eekhoorn\PhpSdk\Contracts\JsonApiSdkInterface;
-use Eekhoorn\PhpSdkInterface\Enums\CacheDurationsEnum;
-use Eekhoorn\PhpSdkInterface\Enums\HttpMethodsEnum;
-use Eekhoorn\PhpSdk\Exceptions\RequestException;
+use DennisKoster\HttpClient\Contracts\HttpClientInterface;
+use DennisKoster\HttpClient\Enums\CacheDurationsEnum;
+use DennisKoster\HttpClient\Enums\HttpMethodsEnum;
+use DennisKoster\HttpClient\Exceptions\RequestException;
 use function GuzzleHttp\Psr7\parse_response;
 use GuzzleHttp\Psr7\Request;
 use function GuzzleHttp\Psr7\str;
-use Http\Client\HttpClient;
+use Http\Client\HttpClient as HttpPlugHttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Simple\FilesystemCache;
 
-class JsonApiSdk implements JsonApiSdkInterface
+class HttpClient implements HttpClientInterface
 {
     /** @var string */
     protected $apiUrl;
 
-    /** @var HttpClient|null */
+    /** @var HttpPlugHttpClient|null */
     protected $httpClient;
 
     /** @var CacheInterface|null */
@@ -29,12 +29,12 @@ class JsonApiSdk implements JsonApiSdkInterface
 
     /**
      * @param string              $apiUrl
-     * @param HttpClient|null     $httpClient
+     * @param HttpPlugHttpClient|null     $httpClient
      * @param CacheInterface|null $cache
      */
     public function __construct(
         string $apiUrl,
-        HttpClient $httpClient = null,
+        HttpPlugHttpClient $httpClient = null,
         CacheInterface $cache = null
     ) {
         if ($httpClient === null) {
@@ -52,7 +52,7 @@ class JsonApiSdk implements JsonApiSdkInterface
      * @param string $apiUrl
      * @return $this
      */
-    public function setApiUrl(string $apiUrl): JsonApiSdkInterface
+    public function setApiUrl(string $apiUrl): HttpClientInterface
     {
         $this->apiUrl = $apiUrl;
 
@@ -68,10 +68,10 @@ class JsonApiSdk implements JsonApiSdkInterface
     }
 
     /**
-     * @param HttpClient $httpClient
+     * @param HttpPlugHttpClient $httpClient
      * @return $this
      */
-    public function setHttpClient(HttpClient $httpClient): JsonApiSdkInterface
+    public function setHttpClient(HttpPlugHttpClient $httpClient): HttpClientInterface
     {
         $this->httpClient = $httpClient;
 
@@ -79,9 +79,9 @@ class JsonApiSdk implements JsonApiSdkInterface
     }
 
     /**
-     * @return HttpClient
+     * @return HttpPlugHttpClient
      */
-    public function getHttpClient(): HttpClient
+    public function getHttpClient(): HttpPlugHttpClient
     {
         return $this->httpClient;
     }
@@ -90,7 +90,7 @@ class JsonApiSdk implements JsonApiSdkInterface
      * @param CacheInterface $cache
      * @return $this
      */
-    public function setCache(CacheInterface $cache): JsonApiSdkInterface
+    public function setCache(CacheInterface $cache): HttpClientInterface
     {
         $this->cache = $cache;
 
@@ -146,36 +146,6 @@ class JsonApiSdk implements JsonApiSdkInterface
         }
 
         return $response;
-    }
-
-    /**
-     * @param int   $page
-     * @param int   $pageSize
-     * @param array $filters
-     * @param array $includes
-     * @return array
-     */
-    protected function buildGetParameters(
-        int $page = 1,
-        int $pageSize = 100,
-        array $filters = [],
-        array $includes = []
-    ): array {
-        $body = [
-            'page' => [
-                'number' => $page,
-                'size'   => $pageSize,
-            ],
-        ];
-        if ( ! empty($filters)) {
-            $body['filter'] = $filters;
-        }
-
-        if ( ! empty($includes)) {
-            $body['includes'] = $includes;
-        }
-
-        return $body;
     }
 
     /**

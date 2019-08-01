@@ -1,14 +1,12 @@
 <?php
 
-namespace Eekhoorn\PhpSdk\Contracts;
+namespace DennisKoster\HttpClient\Contracts;
 
-use Eekhoorn\PhpSdkInterface\Enums\HttpMethodsEnum;
-use Eekhoorn\PhpSdk\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 
-interface JsonApiSdkInterface
+interface HttpClientInterface
 {
     /**
      * @param string $apiUrl
