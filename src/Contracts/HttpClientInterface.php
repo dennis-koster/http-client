@@ -23,12 +23,12 @@ interface HttpClientInterface
      * @param HttpClient $httpClient
      * @return $this
      */
-    public function setHttpClient(HttpClient $httpClient): self;
+    public function setHttpPlugHttpClient(HttpClient $httpClient): self;
 
     /**
      * @return HttpClient
      */
-    public function getHttpClient(): HttpClient;
+    public function getHttpPlugHttpClient(): HttpClient;
 
     /**
      * @param CacheInterface $cache

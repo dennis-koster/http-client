@@ -28,24 +28,24 @@ class HttpClient implements HttpClientInterface
     protected $cache;
 
     /**
-     * @param string              $apiUrl
-     * @param HttpPlugHttpClient|null     $httpClient
-     * @param CacheInterface|null $cache
+     * @param string                  $apiUrl
+     * @param HttpPlugHttpClient|null $httpPlugHttpClient
+     * @param CacheInterface|null     $cache
      */
     public function __construct(
         string $apiUrl,
-        HttpPlugHttpClient $httpClient = null,
+        HttpPlugHttpClient $httpPlugHttpClient = null,
         CacheInterface $cache = null
     ) {
-        if ($httpClient === null) {
-            $httpClient = HttpClientDiscovery::find();
+        if ($httpPlugHttpClient === null) {
+            $httpPlugHttpClient = HttpClientDiscovery::find();
         }
 
-        $this->setCache($cache ?: new FilesystemCache('de-eekhoorn-sdk'));
+        $this->setCache($cache ?: new FilesystemCache('dennis-koster-http-client'));
 
         $this
             ->setApiUrl($apiUrl)
-            ->setHttpClient($httpClient);
+            ->setHttpPlugHttpClient($httpPlugHttpClient);
     }
 
     /**
@@ -71,7 +71,7 @@ class HttpClient implements HttpClientInterface
      * @param HttpPlugHttpClient $httpClient
      * @return $this
      */
-    public function setHttpClient(HttpPlugHttpClient $httpClient): HttpClientInterface
+    public function setHttpPlugHttpClient(HttpPlugHttpClient $httpClient): HttpClientInterface
     {
         $this->httpClient = $httpClient;
 
@@ -81,7 +81,7 @@ class HttpClient implements HttpClientInterface
     /**
      * @return HttpPlugHttpClient
      */
-    public function getHttpClient(): HttpPlugHttpClient
+    public function getHttpPlugHttpClient(): HttpPlugHttpClient
     {
         return $this->httpClient;
     }

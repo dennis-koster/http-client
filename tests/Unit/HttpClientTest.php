@@ -37,17 +37,17 @@ class HttpClientTest extends TestCase
     }
 
     /** @test */
-    public function it_sets_an_http_client_through_the_constructor()
+    public function it_sets_an_http_plug_http_client_through_the_constructor()
     {
-        $this->assertSame($this->httpPlugHttpClient, $this->httpClient->getHttpClient());
+        $this->assertSame($this->httpPlugHttpClient, $this->httpClient->getHttpPlugHttpClient());
     }
 
     /** @test */
-    public function it_sets_an_http_client_through_the_setter()
+    public function it_sets_an_http_plug_http_client_through_the_setter()
     {
         $httpClient = Mockery::mock(HttpPlugHttpClient::class);
-        $this->httpClient->setHttpClient($httpClient);
-        $this->assertSame($httpClient, $this->httpClient->getHttpClient());
+        $this->httpClient->setHttpPlugHttpClient($httpClient);
+        $this->assertSame($httpClient, $this->httpClient->getHttpPlugHttpClient());
     }
 
     /** @test */
@@ -124,7 +124,7 @@ class HttpClientTest extends TestCase
                 'getReasonPhrase' => 'Authorization required',
             ]),
         ]);
-        $this->httpClient->setHttpClient($httpClient);
+        $this->httpClient->setHttpPlugHttpClient($httpClient);
 
         $this->expectException(RequestException::class);
         $this->expectExceptionMessage('Authorization required');
@@ -144,7 +144,7 @@ class HttpClientTest extends TestCase
                 'getBody'            => '',
             ]),
         ]);
-        $this->httpClient->setHttpClient($httpClient);
+        $this->httpClient->setHttpPlugHttpClient($httpClient);
         $response = $this->httpClient->doRequest('/foo-bar', 'get');
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
