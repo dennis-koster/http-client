@@ -143,6 +143,7 @@ class HttpClient implements HttpClientInterface
         // Store the response in cache
         if (strtolower($method) === 'get' && $ttl !== 0) {
             $this->cache->set($cacheKey, str($response), $ttl);
+            return parse_response($this->cache->get($cacheKey));
         }
 
         return $response;
