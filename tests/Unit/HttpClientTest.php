@@ -21,19 +21,12 @@ class HttpClientTest extends TestCase
     /** @var HttpPlugHttpClient */
     private $httpClient;
 
-    /** @var CacheInterface */
-    private $cache;
-
     public function setUp(): void
     {
         parent::setUp();
 
         $this->httpPlugHttpClient = Mockery::mock(HttpPlugHttpClient::class);
-        $this->cache              = Mockery::mock(CacheInterface::class, [
-            'get' => null,
-            'set' => true,
-        ]);
-        $this->httpClient         = new HttpClient('https://api.foobar.com', $this->httpPlugHttpClient, $this->cache);
+        $this->httpClient         = new HttpClient('https://api.foobar.com', $this->httpPlugHttpClient);
     }
 
     /** @test */
@@ -61,20 +54,6 @@ class HttpClientTest extends TestCase
     {
         $this->httpClient->setApiUrl('http://api.foo.bar');
         $this->assertEquals('http://api.foo.bar', $this->httpClient->getApiUrl());
-    }
-
-    /** @test */
-    public function it_sets_the_cache_system_through_the_constructor()
-    {
-        $this->assertSame($this->cache, $this->httpClient->getCache());
-    }
-
-    /** @test */
-    public function it_sets_the_cache_system_through_the_setter()
-    {
-        $cache = Mockery::mock(CacheInterface::class);
-        $this->httpClient->setCache($cache);
-        $this->assertSame($cache, $this->httpClient->getCache());
     }
 
     /** @test */

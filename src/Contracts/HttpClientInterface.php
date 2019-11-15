@@ -2,9 +2,10 @@
 
 namespace DennisKoster\HttpClient\Contracts;
 
+use DennisKoster\HttpClient\Enums\HttpMethodsEnum;
+use DennisKoster\HttpClient\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
-use Psr\SimpleCache\CacheInterface;
 
 interface HttpClientInterface
 {
@@ -29,17 +30,6 @@ interface HttpClientInterface
      * @return HttpClient
      */
     public function getHttpPlugHttpClient(): HttpClient;
-
-    /**
-     * @param CacheInterface $cache
-     * @return $this
-     */
-    public function setCache(CacheInterface $cache): self;
-
-    /**
-     * @return CacheInterface
-     */
-    public function getCache(): CacheInterface;
 
     /**
      * @param string $uri
