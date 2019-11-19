@@ -2,6 +2,8 @@
 
 namespace DennisKoster\HttpClient\Contracts;
 
+use DennisKoster\HttpClient\Enums\CacheDurationsEnum;
+use DennisKoster\HttpClient\Enums\HttpMethodsEnum;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -46,10 +48,15 @@ interface HttpClientInterface
      * @param string $method
      * @param array  $body
      * @param array  $headers
+     * @param int    $ttl
      * @return ResponseInterface
-     * @throws \Http\Client\Exception
-     * @throws RequestException
      */
-    public function doRequest($uri, $method = HttpMethodsEnum::GET, array $body = [], array $headers = []): ResponseInterface;
+    public function doRequest(
+        $uri,
+        $method = HttpMethodsEnum::GET,
+        array $body = [],
+        array $headers = [],
+        $ttl = CacheDurationsEnum::DURATION_10_MIN
+    ): ResponseInterface;
 
 }
