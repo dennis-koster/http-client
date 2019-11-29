@@ -108,29 +108,22 @@ class HttpClient implements HttpClientInterface
     /**
      * @param string $uri
      * @param string $method
-     * @param array  $body
+     * @param array|string  $body
      * @param array  $headers
      * @param int    $ttl
      * @return ResponseInterface
      * @throws RequestException
      * @throws \Http\Client\Exception
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function doRequest(
         $uri,
         $method = HttpMethodsEnum::GET,
-        array $body = [],
+        $body = [],
         array $headers = [],
         $ttl = CacheDurationsEnum::DURATION_10_MIN
     ): ResponseInterface {
         if (strpos($uri, $this->apiUrl) !== 0) {
             $uri = $this->apiUrl . $uri;
-        }
-
-        // Attempt to fetch a response from cache
-        $cacheKey = sha1(http_build_query($headers) . $uri);
-        if (($response = $this->cache->get($cacheKey)) && strtolower($method) === 'get' && $ttl !== 0) {
-            return parse_response($response);
         }
 
         $request  = $this->buildRequest($uri, $method, $body, $headers);
@@ -140,25 +133,71 @@ class HttpClient implements HttpClientInterface
             throw new RequestException($request, $response);
         }
 
-        // Store the response in cache
-        if (strtolower($method) === 'get' && $ttl !== 0) {
-            $this->cache->set($cacheKey, str($response), $ttl);
-            return parse_response($this->cache->get($cacheKey));
+        return $response;
+    }
+
+    /**
+     * @param string $url
+     * @param array|string  $body
+     * @param array  $headers
+     * @return ResponseInterface
+     * @throws RequestException
+     * @throws \Http\Client\Exception
+     */
+    public function post(string $url, $body = [], array $headers = []): ResponseInterface
+    {
+        return $this->doRequest(
+            $url,
+            HttpMethodsEnum::POST,
+            $body,
+            $headers
+        );
+    }
+
+    /**
+     * @param string $url
+     * @param array  $headers
+     * @param int    $ttl
+     * @return ResponseInterface
+     * @throws RequestException
+     * @throws \Http\Client\Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function get(string $url, array $headers = [], $ttl = CacheDurationsEnum::DURATION_10_MIN): ResponseInterface
+    {
+        // Attempt to fetch a response from cache
+        $cacheKey = sha1(http_build_query($headers) . $url);
+        if ($ttl !== 0 && ($response = $this->cache->get($cacheKey))) {
+            return parse_response($response);
         }
 
-        return $response;
+        $response = $this->doRequest(
+            $url,
+            HttpMethodsEnum::GET,
+            [],
+            $headers,
+            $ttl
+        );
+
+        if ($ttl === 0) {
+            return $response;
+        }
+
+        // Store the response in cache
+        $this->cache->set($cacheKey, str($response), $ttl);
+        return parse_response($this->cache->get($cacheKey));
     }
 
     /**
      * @param              $uri
      * @param string       $method
-     * @param array        $body
+     * @param array|string        $body
      * @param array        $headers
      * @return RequestInterface
      */
-    protected function buildRequest($uri, $method = HttpMethodsEnum::GET, array $body = [], array $headers = []): RequestInterface
+    protected function buildRequest($uri, $method = HttpMethodsEnum::GET, $body = [], array $headers = []): RequestInterface
     {
-        if ($method === HttpMethodsEnum::GET && ! empty($body)) {
+        if ($method === HttpMethodsEnum::GET && is_array($body) && ! empty($body)) {
             $uri  .= "?" . http_build_query($body);
             $body = null;
         }
@@ -167,8 +206,6 @@ class HttpClient implements HttpClientInterface
             $body = json_encode($body);
         }
 
-        $request = new Request($method, $uri, $headers, $body);
-
-        return $request;
+        return new Request($method, $uri, $headers, $body);
     }
 }
