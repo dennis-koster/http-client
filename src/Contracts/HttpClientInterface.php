@@ -4,6 +4,7 @@ namespace DennisKoster\HttpClient\Contracts;
 
 use DennisKoster\HttpClient\Enums\CacheDurationsEnum;
 use DennisKoster\HttpClient\Enums\HttpMethodsEnum;
+use DennisKoster\HttpClient\Exceptions\RequestException;
 use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -44,6 +45,27 @@ interface HttpClientInterface
     public function getCache(): CacheInterface;
 
     /**
+     * @param string $url
+     * @param array|string  $body
+     * @param array  $headers
+     * @return ResponseInterface
+     * @throws RequestException
+     * @throws \Http\Client\Exception
+     */
+    public function post(string $url, $body = [], array $headers = []): ResponseInterface;
+
+    /**
+     * @param string $url
+     * @param array  $headers
+     * @param int    $ttl
+     * @return ResponseInterface
+     * @throws RequestException
+     * @throws \Http\Client\Exception
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function get(string $url, array $headers = [], $ttl = CacheDurationsEnum::DURATION_10_MIN): ResponseInterface;
+
+    /**
      * @param string $uri
      * @param string $method
      * @param array  $body
@@ -58,5 +80,4 @@ interface HttpClientInterface
         array $headers = [],
         $ttl = CacheDurationsEnum::DURATION_10_MIN
     ): ResponseInterface;
-
 }
