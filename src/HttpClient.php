@@ -122,7 +122,7 @@ class HttpClient implements HttpClientInterface
         array $headers = [],
         $ttl = CacheDurationsEnum::DURATION_10_MIN
     ): ResponseInterface {
-        if (strpos($uri, $this->apiUrl) !== 0) {
+        if ( ! empty($this->apiUrl) && strpos($uri, $this->apiUrl) !== 0) {
             $uri = $this->apiUrl . $uri;
         }
 
